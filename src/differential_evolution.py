@@ -12,12 +12,14 @@ class DE:
                  all_mode=False,
                  device='cpu',
                  number_of_samples=-1,
-                 number_of_iterations=10):
+                 number_of_iterations=10,
+                 verbose=False):
         self.all_mode = all_mode
         self.device = device
         self.number_of_samples = number_of_samples
         self.number_of_iterations = number_of_iterations
         self.losses = {}
+        self.verbose = verbose
 
     def get_states(self, model, list_mode=False):
         if not list_mode:
@@ -87,7 +89,8 @@ class DE:
         _avg_loss = sum(results) / len(results)
         self.losses[_popsize].append(_avg_loss)
 
-        print(f'--- individual {_popsize} gets loss {_avg_loss}')
+        if self.verbose:
+            print(f'--- individual {_popsize} gets loss {_avg_loss}')
 
         return _avg_loss
 
@@ -102,7 +105,8 @@ class DE:
         min_b, max_b = np.asarray(bounds).T
         diff = np.fabs(min_b - max_b)
 
-        print('Population 0')
+        if self.verbose:
+            print('Population 0')
 
         pop = []
         for _popsize in range(popsize):
@@ -117,7 +121,9 @@ class DE:
         best = pop[best_idx]
 
         for i_iter in range(its):
-            print(f'Population {i_iter + 1}')
+            if self.verbose:
+                print(f'Population {i_iter + 1}')
+
             for i_individual in range(popsize):
                 idxs = [idx for idx in range(popsize) if idx != i_individual]
                 indexes = np.random.choice(idxs, 3, replace=False)
@@ -152,18 +158,20 @@ def train(model,
           all_mode=False,
           device='cpu',
           number_of_samples=-1,
-          number_of_iterations=10):
+          number_of_iterations=10,
+          verbose=False):
     total_train_time_start = time.time()
-    de = DE(all_mode,
-            device,
-            number_of_samples,
-            number_of_iterations)
-    de.de(fobj=DE.bert_fobj,
-          bounds=[(-1, 1)],
-          model=model)
+
+    _de = DE(all_mode,
+             device,
+             number_of_samples,
+             number_of_iterations,
+             verbose=verbose)
+    _de.de(fobj=_de.bert_fobj,
+           bounds=[(-1, 1)],
+           model=model)
 
     t0 = time.time()
-
     model.eval()
 
     start_logits, end_logits = [], []
@@ -188,7 +196,8 @@ def train(model,
 
     validation_time = format_time(time.time() - t0)
 
-    print("--- Validation took: {:}".format(validation_time))
+    if verbose:
+        print("--- Validation took: {:}".format(validation_time))
+        print("Training complete!")
 
-    print("Training complete!")
     print("Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))

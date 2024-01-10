@@ -20,15 +20,17 @@ def train(model,
           dataset,
           validation_processed_dataset,
           epochs=10,
-          device='cuda'):
+          device='cuda',
+          verbose=False):
     stats = []
 
     total_train_time_start = time.time()
 
     for epoch in range(epochs):
-        print(' ')
-        print(f'=====Epoch {epoch + 1}=====')
-        print('Training....')
+        if verbose:
+            print(' ')
+            print(f'=====Epoch {epoch + 1}=====')
+            print('Training....')
 
         t0 = time.time()
 
@@ -38,7 +40,10 @@ def train(model,
 
             if step % 40 == 0 and not step == 0:
                 elapsed_time = format_time(time.time() - t0)
-                print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(train_dataloader), elapsed_time))
+                if verbose:
+                    print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step,
+                                                                                len(train_dataloader),
+                                                                                elapsed_time))
 
             input_ids = batch['input_ids'].to(device)
             attention_mask = batch['attention_mask'].to(device)
@@ -65,12 +70,13 @@ def train(model,
 
         training_time = format_time(time.time() - t0)
 
-        print("")
-        print("  Average training loss: {0:.2f}".format(avg_train_loss))
-        print("  Training epoch took: {:}".format(training_time))
+        if verbose:
+            print("")
+            print("  Average training loss: {0:.2f}".format(avg_train_loss))
+            print("  Training epoch took: {:}".format(training_time))
 
-        print("")
-        print("Running Validation...")
+            print("")
+            print("Running Validation...")
 
         t0 = time.time()
 
@@ -98,7 +104,8 @@ def train(model,
 
         validation_time = format_time(time.time() - t0)
 
-        print("--- Validation took: {:}".format(validation_time))
+        if verbose:
+            print("--- Validation took: {:}".format(validation_time))
+            print("Training complete!")
 
-        print("Training complete!")
         print("Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))
