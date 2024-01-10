@@ -9,11 +9,13 @@ from src.utils import format_time, predict_answers_and_evaluate
 
 class DE:
     def __init__(self,
+                 train_dataloader,
                  all_mode=False,
                  device='cpu',
                  number_of_samples=-1,
                  number_of_iterations=10,
                  verbose=False):
+        self.train_dataloader = train_dataloader
         self.all_mode = all_mode
         self.device = device
         self.number_of_samples = number_of_samples
@@ -45,7 +47,7 @@ class DE:
                         states.append((model.state_dict()[key].cpu().numpy()))
             return states
 
-    def bert_fobj(self, train_dataloader, model, states, _popsize):
+    def bert_fobj(self, model, states, _popsize):
         for i, key in enumerate(x for x in list(model.state_dict().keys()) if 'qa_outputs' in x):
             if not self.all_mode:
                 if 'qa_outputs' in key:
@@ -55,7 +57,7 @@ class DE:
                 model.state_dict()[key] = states[i]
 
         results = []
-        data = list(train_dataloader)
+        data = list(self.train_dataloader)
 
         if self.number_of_samples != -1:
             for i in range(self.number_of_samples):
@@ -152,6 +154,7 @@ class DE:
 
 
 def train(model,
+          train_dataloader,
           eval_dataloader,
           validation_processed_dataset,
           dataset,
@@ -162,14 +165,16 @@ def train(model,
           verbose=False):
     total_train_time_start = time.time()
 
-    _de = DE(all_mode,
-             device,
-             number_of_samples,
-             number_of_iterations,
+    _de = DE(device=device,
+             train_dataloader=train_dataloader,
+             all_mode=all_mode,
+             number_of_samples=number_of_samples,
+             number_of_iterations=number_of_iterations,
              verbose=verbose)
-    _de.de(fobj=_de.bert_fobj,
-           bounds=[(-1, 1)],
-           model=model)
+
+    best = list(_de.de(fobj=_de.bert_fobj,
+                bounds=[(-1, 1)],
+                model=model))
 
     t0 = time.time()
     model.eval()

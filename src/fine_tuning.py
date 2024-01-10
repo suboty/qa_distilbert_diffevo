@@ -80,32 +80,32 @@ def train(model,
 
         t0 = time.time()
 
-        model.eval()
+    model.eval()
 
-        start_logits, end_logits = [], []
-        for step, batch in enumerate(eval_dataloader):
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
+    start_logits, end_logits = [], []
+    for step, batch in enumerate(eval_dataloader):
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
 
-            with torch.no_grad():
-                result = model(input_ids=input_ids,
-                               attention_mask=attention_mask, return_dict=True)
+        with torch.no_grad():
+            result = model(input_ids=input_ids,
+                            attention_mask=attention_mask, return_dict=True)
 
-            start_logits.append(result.start_logits.cpu().numpy())
-            end_logits.append(result.end_logits.cpu().numpy())
+        start_logits.append(result.start_logits.cpu().numpy())
+        end_logits.append(result.end_logits.cpu().numpy())
 
-        start_logits = np.concatenate(start_logits)
-        end_logits = np.concatenate(end_logits)
+    start_logits = np.concatenate(start_logits)
+    end_logits = np.concatenate(end_logits)
 
-        answers, metrics_ = predict_answers_and_evaluate(start_logits, end_logits,
-                                                         validation_processed_dataset,
-                                                         dataset["validation"])
-        print(f'### Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
+    answers, metrics_ = predict_answers_and_evaluate(start_logits, end_logits,
+                                                     validation_processed_dataset,
+                                                     dataset["validation"])
+    print(f'### Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
 
-        validation_time = format_time(time.time() - t0)
+    validation_time = format_time(time.time() - t0)
 
-        if verbose:
-            print("--- Validation took: {:}".format(validation_time))
-            print("Training complete!")
+    if verbose:
+        print("--- Validation took: {:}".format(validation_time))
+        print("Training complete!")
 
-        print("Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))
+    print("Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))
