@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     for _iter in range(ITERATION):
         dataset = copy.deepcopy(root_dataset)
-        train_sample_length = _iter * 1000
-        val_sample_length = _iter * 100
+        train_sample_length = (_iter + 1) * 1000
+        val_sample_length = (_iter + 1) * 100
         dataset['train'] = dataset['train'].select([i for i in range(train_sample_length)])
         dataset['validation'] = dataset['validation'].select([i for i in range(val_sample_length)])
 
