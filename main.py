@@ -25,10 +25,6 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(checkpoint)
     utils = Utils(tokenizer)
 
-    model = DistilBertForQuestionAnswering.from_pretrained(checkpoint)
-    model = model.to(device)
-    optimizer = AdamW(model.parameters(), lr=2e-5)
-
     root_dataset = load_dataset("squad")
 
     for _iter in range(ITERATION):
@@ -54,21 +50,32 @@ if __name__ == '__main__':
                                                                  batched=True,
                                                                  remove_columns=dataset["validation"].column_names, )
 
-        ft_train(model,
-                 optimizer,
-                 tokenizer,
-                 train_dataloader,
-                 eval_dataloader,
-                 dataset,
-                 validation_processed_dataset,
-                 epochs=1,
+        model = DistilBertForQuestionAnswering.from_pretrained(checkpoint)
+        model = model.to(device)
+        optimizer = AdamW(model.parameters(), lr=2e-5)
+        model.train()
+
+        ft_train(model=model,
+                 optimizer=optimizer,
+                 tokenizer=tokenizer,
+                 train_dataloader=train_dataloader,
+                 eval_dataloader=eval_dataloader,
+                 dataset=dataset,
+                 validation_processed_dataset=validation_processed_dataset,
+                 epochs=10,
                  device=device)
 
-        de_train(model,
-                 eval_dataloader,
-                 validation_processed_dataset,
-                 dataset,
+        model = DistilBertForQuestionAnswering.from_pretrained(checkpoint)
+        model = model.to(device)
+        optimizer = AdamW(model.parameters(), lr=2e-5)
+        model.train()
+
+        de_train(model=model,
+                 train_dataloader=train_dataloader,
+                 eval_dataloader=eval_dataloader,
+                 validation_processed_dataset=validation_processed_dataset,
+                 dataset=dataset,
                  all_mode=False,
                  device=device,
                  number_of_samples=-1,
-                 number_of_iterations=1)
+                 number_of_iterations=100)
