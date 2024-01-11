@@ -97,9 +97,9 @@ class DE:
         return _avg_loss
 
     def de(self, fobj, bounds, model,
-           mut=0.8,
+           mut=0.5,
            crossp=0.7,
-           popsize=5):
+           popsize=10):
         its = self.number_of_iterations
         model.eval().to(self.device)
         states = self.get_states(model, list_mode=True)
@@ -197,7 +197,7 @@ def train(model,
     answers, metrics_ = predict_answers_and_evaluate(start_logits, end_logits,
                                                      validation_processed_dataset,
                                                      dataset["validation"])
-    print(f'### Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
+    print(f'### DE Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
 
     validation_time = format_time(time.time() - t0)
 
@@ -205,4 +205,4 @@ def train(model,
         print("--- Validation took: {:}".format(validation_time))
         print("Training complete!")
 
-    print("Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))
+    print("DE Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))

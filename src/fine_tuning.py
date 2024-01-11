@@ -100,7 +100,7 @@ def train(model,
     answers, metrics_ = predict_answers_and_evaluate(start_logits, end_logits,
                                                      validation_processed_dataset,
                                                      dataset["validation"])
-    print(f'### Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
+    print(f'### FT Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
 
     validation_time = format_time(time.time() - t0)
 
@@ -108,4 +108,4 @@ def train(model,
         print("--- Validation took: {:}".format(validation_time))
         print("Training complete!")
 
-    print("Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))
+    print("FT Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))

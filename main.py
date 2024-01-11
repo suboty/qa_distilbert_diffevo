@@ -10,13 +10,16 @@ from transformers import AdamW, default_data_collator
 from src.data import DataQA
 from src.utils import Utils
 from src.fine_tuning import train as ft_train
+from src.fine_tuning import set_seed
 from src.differential_evolution import train as de_train
 
 
-ITERATION = 1
+ITERATION = 10
 
 if __name__ == '__main__':
     warnings.simplefilter("ignore")
+
+    set_seed(42)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Available device: {device}')
@@ -78,4 +81,4 @@ if __name__ == '__main__':
                  all_mode=False,
                  device=device,
                  number_of_samples=-1,
-                 number_of_iterations=100)
+                 number_of_iterations=10)
