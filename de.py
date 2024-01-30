@@ -9,14 +9,14 @@ from transformers import AdamW, default_data_collator
 
 from src.data import DataQA
 from src.utils import Utils
-from src.fine_tuning import train as ft_train
 from src.fine_tuning import set_seed
 from src.differential_evolution import train as de_train
 
 
-ITERATION = 20
+ITERATION = 10
 
 if __name__ == '__main__':
+    # TODO: fix old logic
     warnings.simplefilter("ignore")
 
     set_seed(42)
@@ -32,16 +32,8 @@ if __name__ == '__main__':
 
     for _iter in range(ITERATION):
         dataset = copy.deepcopy(root_dataset)
-
-        if _iter % 10 == 0 and _iter != 0:
-            train_sample_length = ((_iter - 10) + 1) * 100
-            val_sample_length = ((_iter - 10) + 1) * 50
-        else:
-            train_sample_length = (_iter + 1) * 100
-            val_sample_length = (_iter + 1) * 50
-
-        print(f'\n{"#"*30}\nITERATION {_iter+1}: {train_sample_length}-{val_sample_length}\n{"#"*30}\n')
-
+        train_sample_length = (_iter + 1) * 1000
+        val_sample_length = (_iter + 1) * 100
         dataset['train'] = dataset['train'].select([i for i in range(train_sample_length)])
         dataset['validation'] = dataset['validation'].select([i for i in range(val_sample_length)])
 
@@ -66,12 +58,12 @@ if __name__ == '__main__':
         optimizer = AdamW(model.parameters(), lr=2e-5)
         model.train()
 
-        ft_train(model=model,
-                 optimizer=optimizer,
-                 tokenizer=tokenizer,
+        de_train(model=model,
                  train_dataloader=train_dataloader,
                  eval_dataloader=eval_dataloader,
-                 dataset=dataset,
                  validation_processed_dataset=validation_processed_dataset,
-                 epochs=10,
-                 device=device)
+                 dataset=dataset,
+                 all_mode=False,
+                 device=device,
+                 number_of_samples=-1,
+                 number_of_iterations=10)

@@ -14,7 +14,7 @@ from src.fine_tuning import set_seed
 from src.differential_evolution import train as de_train
 
 
-ITERATION = 10
+ITERATION = 20
 
 if __name__ == '__main__':
     warnings.simplefilter("ignore")
@@ -29,29 +29,38 @@ if __name__ == '__main__':
     utils = Utils(tokenizer)
 
     root_dataset = load_dataset("squad")
+    dataset = copy.deepcopy(root_dataset)
+
+    val_sample_length = 500
+
+    dataset['validation'] = dataset['validation'].select([i for i in range(val_sample_length)])
+    val_dataset = DataQA(dataset, mode="validation", utils=utils)
+    eval_dataloader = DataLoader(
+        val_dataset, collate_fn=default_data_collator, batch_size=2
+    )
+
+    validation_processed_dataset = dataset["validation"].map(utils.preprocess_validation_examples,
+                                                             batched=True,
+                                                             remove_columns=dataset["validation"].column_names, )
 
     for _iter in range(ITERATION):
-        dataset = copy.deepcopy(root_dataset)
-        train_sample_length = (_iter + 1) * 1000
-        val_sample_length = (_iter + 1) * 100
+
+        if _iter % 10 == 0 and _iter != 0:
+            train_sample_length = ((_iter - 10) + 1) * 100
+        else:
+            train_sample_length = (_iter + 1) * 100
+
+        print(f'\n{"#"*30}\nITERATION {_iter+1}: {train_sample_length}-{val_sample_length}\n{"#"*30}\n')
+
         dataset['train'] = dataset['train'].select([i for i in range(train_sample_length)])
-        dataset['validation'] = dataset['validation'].select([i for i in range(val_sample_length)])
 
         train_dataset = DataQA(dataset, mode="train", utils=utils)
-        val_dataset = DataQA(dataset, mode="validation", utils=utils)
         train_dataloader = DataLoader(
             train_dataset,
             shuffle=True,
             collate_fn=default_data_collator,
             batch_size=2,
         )
-        eval_dataloader = DataLoader(
-            val_dataset, collate_fn=default_data_collator, batch_size=2
-        )
-
-        validation_processed_dataset = dataset["validation"].map(utils.preprocess_validation_examples,
-                                                                 batched=True,
-                                                                 remove_columns=dataset["validation"].column_names, )
 
         model = DistilBertForQuestionAnswering.from_pretrained(checkpoint)
         model = model.to(device)
@@ -67,18 +76,3 @@ if __name__ == '__main__':
                  validation_processed_dataset=validation_processed_dataset,
                  epochs=10,
                  device=device)
-
-        model = DistilBertForQuestionAnswering.from_pretrained(checkpoint)
-        model = model.to(device)
-        optimizer = AdamW(model.parameters(), lr=2e-5)
-        model.train()
-
-        de_train(model=model,
-                 train_dataloader=train_dataloader,
-                 eval_dataloader=eval_dataloader,
-                 validation_processed_dataset=validation_processed_dataset,
-                 dataset=dataset,
-                 all_mode=False,
-                 device=device,
-                 number_of_samples=-1,
-                 number_of_iterations=10)
