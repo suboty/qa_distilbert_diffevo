@@ -11,7 +11,6 @@ from src.data import DataQA
 from src.utils import Utils
 from src.fine_tuning import train as ft_train
 from src.fine_tuning import set_seed
-from src.differential_evolution import train as de_train
 
 
 ITERATION = 20
@@ -29,32 +28,36 @@ if __name__ == '__main__':
     utils = Utils(tokenizer)
 
     root_dataset = load_dataset("squad")
-    dataset = copy.deepcopy(root_dataset)
-
-    val_sample_length = 500
-
-    dataset['validation'] = dataset['validation'].select([i for i in range(val_sample_length)])
-    val_dataset = DataQA(dataset, mode="validation", utils=utils)
-    eval_dataloader = DataLoader(
-        val_dataset, collate_fn=default_data_collator, batch_size=2
-    )
-
-    validation_processed_dataset = dataset["validation"].map(utils.preprocess_validation_examples,
-                                                             batched=True,
-                                                             remove_columns=dataset["validation"].column_names, )
 
     for _iter in range(ITERATION):
+
+        if _iter == 10:
+            set_seed(424)
 
         if _iter % 10 == 0 and _iter != 0:
             train_sample_length = ((_iter - 10) + 1) * 100
         else:
             train_sample_length = (_iter + 1) * 100
 
+        val_sample_length = 500
+
         print(f'\n{"#"*30}\nITERATION {_iter+1}: {train_sample_length}-{val_sample_length}\n{"#"*30}\n')
 
+        dataset = copy.deepcopy(root_dataset)
+
         dataset['train'] = dataset['train'].select([i for i in range(train_sample_length)])
+        dataset['validation'] = dataset['validation'].select([i for i in range(val_sample_length)])
 
         train_dataset = DataQA(dataset, mode="train", utils=utils)
+        val_dataset = DataQA(dataset, mode="validation", utils=utils)
+        eval_dataloader = DataLoader(
+            val_dataset, collate_fn=default_data_collator, batch_size=2
+        )
+
+        validation_processed_dataset = dataset["validation"].map(utils.preprocess_validation_examples,
+                                                                 batched=True,
+                                                                 remove_columns=dataset["validation"].column_names, )
+
         train_dataloader = DataLoader(
             train_dataset,
             shuffle=True,
