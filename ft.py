@@ -11,6 +11,7 @@ from src.data import DataQA
 from src.utils import Utils
 from src.fine_tuning import train as ft_train
 from src.fine_tuning import set_seed
+from logger import logger
 
 
 ITERATION = 20
@@ -42,6 +43,7 @@ if __name__ == '__main__':
         val_sample_length = 500
 
         print(f'\n{"#"*30}\nITERATION {_iter+1}: {train_sample_length}-{val_sample_length}\n{"#"*30}\n')
+        logger.info(f'\n{"#"*30}\nITERATION {_iter+1}: {train_sample_length}-{val_sample_length}\n{"#"*30}\n')
 
         dataset = copy.deepcopy(root_dataset)
 

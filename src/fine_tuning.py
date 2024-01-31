@@ -2,7 +2,8 @@ import random,time
 import numpy as np
 import torch
 
-from src.utils import Utils, format_time, predict_answers_and_evaluate
+from src.utils import format_time, predict_answers_and_evaluate
+from logger import logger
 
 
 def set_seed(seed=123):
@@ -101,6 +102,7 @@ def train(model,
                                                      validation_processed_dataset,
                                                      dataset["validation"])
     print(f'### FT Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
+    logger.info(f'### FT Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
 
     validation_time = format_time(time.time() - t0)
 
@@ -109,3 +111,4 @@ def train(model,
         print("Training complete!")
 
     print("FT Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))
+    logger.info("FT Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))
