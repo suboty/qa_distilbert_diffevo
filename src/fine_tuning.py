@@ -1,5 +1,6 @@
 import random,time
 import numpy as np
+import os
 import torch
 
 from src.utils import format_time, predict_answers_and_evaluate
@@ -22,7 +23,8 @@ def train(model,
           validation_processed_dataset,
           epochs=10,
           device='cuda',
-          verbose=False):
+          verbose=False,
+          approach='FT'):
     stats = []
 
     total_train_time_start = time.time()
@@ -101,8 +103,9 @@ def train(model,
     answers, metrics_ = predict_answers_and_evaluate(start_logits, end_logits,
                                                      validation_processed_dataset,
                                                      dataset["validation"])
-    print(f'### FT Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
-    logger.info(f'### FT Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
+    print(f'### {approach} Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
+    if os.environ.get('LOGGER_DISABLE') != '1':
+        logger.info(f'### {approach} Exact match: {metrics_["exact_match"]}, F1 score: {metrics_["f1"]}')
 
     validation_time = format_time(time.time() - t0)
 
@@ -110,5 +113,6 @@ def train(model,
         print("--- Validation took: {:}".format(validation_time))
         print("Training complete!")
 
-    print("FT Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))
-    logger.info("FT Total training took {:} (h:mm:ss)".format(format_time(time.time() - total_train_time_start)))
+    print("{}} Total training took {:} (h:mm:ss)".format(approach, format_time(time.time() - total_train_time_start)))
+    if os.environ.get('LOGGER_DISABLE') != '1':
+        logger.info("{} Total training took {:} (h:mm:ss)".format(approach, format_time(time.time() - total_train_time_start)))

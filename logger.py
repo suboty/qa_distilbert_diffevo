@@ -29,4 +29,7 @@ def get_logger():
     return logger_
 
 
-logger = get_logger()
+if os.environ.get('LOGGER_DISABLE') != '1':
+    logger = get_logger()
+else:
+    logger = None

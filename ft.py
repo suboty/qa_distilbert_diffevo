@@ -44,7 +44,8 @@ if __name__ == '__main__':
         val_sample_length = 500
 
         print(f'\n{"#"*30}\nITERATION {_iter+1}: {train_sample_length}-{val_sample_length}\n{"#"*30}\n')
-        logger.info(f'\n{"#"*30}\nITERATION {_iter+1}: {train_sample_length}-{val_sample_length}\n{"#"*30}\n')
+        if os.environ.get('LOGGER_DISABLE') != '1':
+            logger.info(f'\n{"#"*30}\nITERATION {_iter+1}: {train_sample_length}-{val_sample_length}\n{"#"*30}\n')
 
         dataset = copy.deepcopy(root_dataset)
 
