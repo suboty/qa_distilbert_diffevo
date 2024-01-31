@@ -15,7 +15,7 @@ from src.fine_tuning import set_seed
 from logger import logger
 
 
-ITERATIONS = os.environ.get('ITERATIONS') if os.environ.get('ITERATIONS') else 20
+ITERATIONS = int(os.environ.get('ITERATIONS')) if os.environ.get('ITERATIONS') else 20
 
 if __name__ == '__main__':
     warnings.simplefilter("ignore")
