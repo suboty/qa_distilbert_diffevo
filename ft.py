@@ -1,4 +1,5 @@
 import copy
+import os
 import warnings
 
 import torch
@@ -14,7 +15,7 @@ from src.fine_tuning import set_seed
 from logger import logger
 
 
-ITERATION = 20
+ITERATIONS = os.environ.get('ITERATIONS') if os.environ.get('ITERATIONS') else 20
 
 if __name__ == '__main__':
     warnings.simplefilter("ignore")
@@ -30,7 +31,7 @@ if __name__ == '__main__':
 
     root_dataset = load_dataset("squad")
 
-    for _iter in range(ITERATION):
+    for _iter in range(ITERATIONS):
 
         if _iter == 10:
             set_seed(424)
