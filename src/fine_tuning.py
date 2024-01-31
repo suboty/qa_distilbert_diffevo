@@ -113,6 +113,6 @@ def train(model,
         print("--- Validation took: {:}".format(validation_time))
         print("Training complete!")
 
-    print("{}} Total training took {:} (h:mm:ss)".format(approach, format_time(time.time() - total_train_time_start)))
+    print("{} Total training took {:} (h:mm:ss)".format(approach, format_time(time.time() - total_train_time_start)))
     if os.environ.get('LOGGER_DISABLE') != '1':
         logger.info("{} Total training took {:} (h:mm:ss)".format(approach, format_time(time.time() - total_train_time_start)))
